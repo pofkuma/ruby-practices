@@ -19,10 +19,11 @@ FIRST_DAY = 1
 LAST_DAY = Date.new(YEAR, MON, -1).day
 days = (FIRST_DAY..LAST_DAY).to_a.map(&:to_s)
 
+LENGTH_A_WEEK = 7
 FIRST_CWDAY = Date.new(YEAR, MON).cwday
-FIRST_CWDAY.times { days.unshift("\s") }
+FIRST_CWDAY.times { days.unshift("\s") } if FIRST_CWDAY < LENGTH_A_WEEK
 
 days = days.map { |day| day.rjust(2) }
-
-LENGTH_A_WEEK = 7
-days.each_slice(LENGTH_A_WEEK) { |sliced_days| puts (sliced_days.join("\s")) }
+days.each_slice(LENGTH_A_WEEK) do |sliced_days|
+  puts (sliced_days.join("\s"))
+end
