@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 MAX_PINS = 10
-MAX_THROW = 10
+MAX_FRAMES = 10
 STRIKE_MARK = 'X'
 
 def strike?(frame)
@@ -35,7 +35,7 @@ end
 total_score = 0
 frames.each_with_index do |frame, index|
   total_score += frame.sum
-  next if index >= (MAX_THROW - 1)
+  next if index >= (MAX_FRAMES - 1)
 
   if strike?(frame)
     total_score += frames[index + 1].sum
