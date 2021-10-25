@@ -27,10 +27,7 @@ scores.each do |score|
   end
 end
 
-frames = []
-throws.each_slice(2) do |throw|
-  frames << throw
-end
+frames = throws.each_slice(2).to_a
 
 total_score = 0
 frames.each_with_index do |frame, index|
