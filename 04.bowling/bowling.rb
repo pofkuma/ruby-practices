@@ -14,6 +14,15 @@ def spare?(frame)
   !strike?(frame) && frame.sum == MAX_PINS
 end
 
+def bonus_score(frames, index, count)
+  next_throws = frames.slice(index + 1, count).flatten
+  if strike?(next_throws)
+    next_throws.take(count + 1).sum
+  else
+    next_throws.take(count).sum
+  end
+end
+
 def final_frame?(index)
   index >= (MAX_FRAMES - 1)
 end
@@ -38,12 +47,10 @@ frames.each_with_index do |frame, index|
   total_score += frame.sum
   next if final_frame?(index)
 
-  next_frame, after_next_frame = frames.slice(index + 1, 2)
   if strike?(frame)
-    total_score += next_frame.sum
-    total_score += after_next_frame[0] if strike?(next_frame)
+    total_score += bonus_score(frames, index, 2)
   elsif spare?(frame)
-    total_score += next_frame[0]
+    total_score += bonus_score(frames, index, 1)
   end
 end
 
