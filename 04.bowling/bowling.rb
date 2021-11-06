@@ -41,18 +41,20 @@ def final_frame?(index)
   index >= (MAX_FRAMES - 1)
 end
 
-frames = convert_scores(ARGV[0])
+def score_for(frames)
+  total_score = 0
+  frames.each_with_index do |frame, index|
+    total_score += frame.sum
+    next if final_frame?(index)
 
-total_score = 0
-frames.each_with_index do |frame, index|
-  total_score += frame.sum
-  next if final_frame?(index)
-
-  if strike?(frame)
-    total_score += bonus_score(frames, index, 2)
-  elsif spare?(frame)
-    total_score += bonus_score(frames, index, 1)
+    if strike?(frame)
+      total_score += bonus_score(frames, index, 2)
+    elsif spare?(frame)
+      total_score += bonus_score(frames, index, 1)
+    end
   end
+  total_score
 end
 
-puts total_score
+frames = convert_scores(ARGV[0])
+puts score_for(frames)
