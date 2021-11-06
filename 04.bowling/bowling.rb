@@ -14,6 +14,10 @@ def spare?(frame)
   !strike?(frame) && frame.sum == MAX_PINS
 end
 
+def final_frame?(index)
+  index >= (MAX_FRAMES - 1)
+end
+
 joined_score = ARGV[0]
 scores = joined_score.split(',')
 
@@ -32,7 +36,7 @@ frames = throws.each_slice(2).to_a
 total_score = 0
 frames.each_with_index do |frame, index|
   total_score += frame.sum
-  next if index >= (MAX_FRAMES - 1)
+  next if final_frame?(index)
 
   if strike?(frame)
     total_score += frames[index + 1].sum
