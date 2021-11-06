@@ -6,6 +6,20 @@ MAX_PINS = 10
 MAX_FRAMES = 10
 STRIKE_MARK = 'X'
 
+def convert_scores(joined_score)
+  scores = joined_score.split(',')
+  throws = []
+  scores.each do |score|
+    if score == STRIKE_MARK
+      throws << MAX_PINS
+      throws << 0
+    else
+      throws << score.to_i
+    end
+  end
+  throws.each_slice(2).to_a
+end
+
 def strike?(frame)
   frame[0] == MAX_PINS
 end
@@ -14,32 +28,33 @@ def spare?(frame)
   !strike?(frame) && frame.sum == MAX_PINS
 end
 
-joined_score = ARGV[0]
-scores = joined_score.split(',')
-
-throws = []
-scores.each do |score|
-  if score == STRIKE_MARK
-    throws << MAX_PINS
-    throws << 0
+def bonus_score(frames, index, count)
+  next_throws = frames.slice(index + 1, count).flatten
+  if strike?(next_throws)
+    next_throws.take(count + 1).sum
   else
-    throws << score.to_i
+    next_throws.take(count).sum
   end
 end
 
-frames = throws.each_slice(2).to_a
-
-total_score = 0
-frames.each_with_index do |frame, index|
-  total_score += frame.sum
-  next if index >= (MAX_FRAMES - 1)
-
-  if strike?(frame)
-    total_score += frames[index + 1].sum
-    total_score += frames[index + 2][0] if strike?(frames[index + 1])
-  elsif spare?(frame)
-    total_score += frames[index + 1][0]
-  end
+def final_frame?(index)
+  index >= (MAX_FRAMES - 1)
 end
 
-puts total_score
+def score_for(frames)
+  total_score = 0
+  frames.each_with_index do |frame, index|
+    total_score += frame.sum
+    next if final_frame?(index)
+
+    if strike?(frame)
+      total_score += bonus_score(frames, index, 2)
+    elsif spare?(frame)
+      total_score += bonus_score(frames, index, 1)
+    end
+  end
+  total_score
+end
+
+frames = convert_scores(ARGV[0])
+puts score_for(frames)
