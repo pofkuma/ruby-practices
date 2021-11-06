@@ -38,11 +38,12 @@ frames.each_with_index do |frame, index|
   total_score += frame.sum
   next if final_frame?(index)
 
+  next_frame, after_next_frame = frames.slice(index + 1, 2)
   if strike?(frame)
-    total_score += frames[index + 1].sum
-    total_score += frames[index + 2][0] if strike?(frames[index + 1])
+    total_score += next_frame.sum
+    total_score += after_next_frame[0] if strike?(next_frame)
   elsif spare?(frame)
-    total_score += frames[index + 1][0]
+    total_score += next_frame[0]
   end
 end
 
