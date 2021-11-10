@@ -13,9 +13,9 @@ end
 
 def convert_layout(line_count, max_name_length)
   lines = Array.new(line_count) { '' }
-  each_slice(line_count) do |lists|
-    lists.each_with_index do |list, index|
-      lines[index] += list.ljust(max_name_length + PADDING_SIZE)
+  each_slice(line_count) do |contents|
+    contents.each_with_index do |content, index|
+      lines[index] += content.ljust(max_name_length + PADDING_SIZE)
     end
   end
   lines.map(&:rstrip).join("\n") << "\n"
@@ -31,16 +31,16 @@ def filter_by_name
   reject { |name| name.start_with?("\.") }
 end
 
-def list_directory_contents(content_lists)
-  filterd_content_lists = content_lists.filter_by_name
-  return if filterd_content_lists.size.zero?
+def list_directory_contents(contents)
+  filterd_contents = contents.filter_by_name
+  return if filterd_contents.size.zero?
 
-  filterd_content_lists.sort.format
+  filterd_contents.sort.format
 end
 
 public :format, :filter_by_name, :list_directory_contents
 
 if $PROGRAM_NAME == __FILE__
-  content_name_lists = Dir.entries(CURRENT_DIRECTORY)
-  print list_directory_contents(content_name_lists)
+  entries = Dir.entries(CURRENT_DIRECTORY)
+  print list_directory_contents(entries)
 end
