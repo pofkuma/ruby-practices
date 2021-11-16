@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-CURRENT_DIRECTORY = '.'
 PADDING_SIZE = 7
 MAX_COLUMUNS = 3
 
@@ -41,6 +40,6 @@ end
 public :format, :filter_by_name, :list_directory_contents
 
 if $PROGRAM_NAME == __FILE__
-  entries = Dir.entries(CURRENT_DIRECTORY)
+  entries = Dir.entries('.')
   print list_directory_contents(entries)
 end
