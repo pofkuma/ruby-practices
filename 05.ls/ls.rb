@@ -10,27 +10,25 @@ def calculate_line_count(size)
   line_count
 end
 
-def convert_layout(line_count, max_name_length)
+def convert_layout(file_names, line_count, max_name_length)
   lines = Array.new(line_count) { '' }
-  each_slice(line_count) do |contents|
-    contents.each_with_index do |content, index|
-      lines[index] += content.ljust(max_name_length + PADDING_SIZE)
+  file_names.each_slice(line_count) do |names|
+    names.each_with_index do |name, index|
+      lines[index] += name.ljust(max_name_length + PADDING_SIZE)
     end
   end
   lines.map(&:rstrip).join("\n") << "\n"
 end
 
-def format
-  line_count = calculate_line_count(size)
-  max_name_length = map(&:length).max
-  convert_layout(line_count, max_name_length)
+def format(contents)
+  line_count = calculate_line_count(contents.size)
+  max_name_length = contents.map(&:length).max
+  convert_layout(contents, line_count, max_name_length)
 end
 
 def list_directory_contents(contents)
-  contents.sort.format unless contents.size.zero?
+  format(contents.sort) unless contents.size.zero?
 end
-
-public :format, :list_directory_contents
 
 if $PROGRAM_NAME == __FILE__
   entries = Dir.glob('*')
