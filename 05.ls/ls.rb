@@ -26,18 +26,13 @@ def format
   convert_layout(line_count, max_name_length)
 end
 
-def filter_by_name
-  reject { |name| name.start_with?("\.") }
-end
-
 def list_directory_contents(contents)
-  filterd_contents = contents.filter_by_name
-  filterd_contents.sort.format unless filterd_contents.size.zero?
+  contents.sort.format unless contents.size.zero?
 end
 
-public :format, :filter_by_name, :list_directory_contents
+public :format, :list_directory_contents
 
 if $PROGRAM_NAME == __FILE__
-  entries = Dir.entries('.')
+  entries = Dir.glob('*')
   print list_directory_contents(entries)
 end
