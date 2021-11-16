@@ -32,9 +32,7 @@ end
 
 def list_directory_contents(contents)
   filterd_contents = contents.filter_by_name
-  return if filterd_contents.size.zero?
-
-  filterd_contents.sort.format
+  filterd_contents.sort.format unless filterd_contents.size.zero?
 end
 
 public :format, :filter_by_name, :list_directory_contents
