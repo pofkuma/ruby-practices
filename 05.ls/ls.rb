@@ -17,7 +17,7 @@ def convert_layout(file_names, line_count, max_name_length)
       lines[index] += name.ljust(max_name_length + PADDING_SIZE)
     end
   end
-  lines.map(&:rstrip).join("\n") << "\n"
+  lines.map(&:rstrip).join("\n")
 end
 
 def format(contents)
@@ -32,5 +32,5 @@ end
 
 if $PROGRAM_NAME == __FILE__
   entries = Dir.glob('*')
-  print list_directory_contents(entries)
+  puts list_directory_contents(entries)
 end
