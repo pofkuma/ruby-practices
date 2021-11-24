@@ -4,12 +4,6 @@
 PADDING_SIZE = 7
 MAX_COLUMUNS = 3
 
-def calculate_line_count(size)
-  line_count = size / MAX_COLUMUNS
-  line_count += 1 unless (size % MAX_COLUMUNS).zero?
-  line_count
-end
-
 def convert_layout(file_names, line_count, max_name_length)
   lines = Array.new(line_count) { '' }
   file_names.each_slice(line_count) do |names|
@@ -23,7 +17,7 @@ end
 def format(contents)
   return if contents.size.zero?
 
-  line_count = calculate_line_count(contents.size)
+  line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
   max_name_length = contents.map(&:length).max
   convert_layout(contents.sort, line_count, max_name_length)
 end
