@@ -21,13 +21,21 @@ def convert_layout(file_names, line_count, max_name_length)
 end
 
 def format(contents)
+  return if contents.size.zero?
+
   line_count = calculate_line_count(contents.size)
   max_name_length = contents.map(&:length).max
-  convert_layout(contents, line_count, max_name_length)
+  convert_layout(contents.sort, line_count, max_name_length)
 end
 
-def list_directory_contents(contents)
-  format(contents.sort) unless contents.size.zero?
+def list_directory_contents(options)
+  entries =
+    if options[:a]
+      Dir.glob('*', File::FNM_DOTMATCH)
+    else
+      Dir.glob('*')
+    end
+  format(entries)
 end
 
 if $PROGRAM_NAME == __FILE__
@@ -38,11 +46,5 @@ if $PROGRAM_NAME == __FILE__
   opt.on('-a') { |boolean| options[:a] = boolean }
 
   opt.parse!(ARGV)
-  entries =
-    if options[:a]
-      Dir.glob('*', File::FNM_DOTMATCH)
-    else
-      Dir.glob('*')
-    end
-  puts list_directory_contents(entries)
+  puts list_directory_contents(options)
 end
