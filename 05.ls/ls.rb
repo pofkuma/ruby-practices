@@ -31,6 +31,18 @@ def list_directory_contents(contents)
 end
 
 if $PROGRAM_NAME == __FILE__
-  entries = Dir.glob('*')
+  require 'optparse'
+  opt = OptionParser.new
+
+  options = {}
+  opt.on('-a') { |boolean| options[:a] = boolean }
+
+  opt.parse!(ARGV)
+  entries =
+    if options[:a]
+      Dir.glob('*', File::FNM_DOTMATCH)
+    else
+      Dir.glob('*')
+    end
   puts list_directory_contents(entries)
 end
