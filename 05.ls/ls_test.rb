@@ -4,12 +4,12 @@ require 'minitest/autorun'
 require_relative 'ls'
 
 class LsTest < Minitest::Test
-  def test_ls_no_options_no_contents
+  def test_format_no_contents
     content_name_lists = []
     assert_nil format(content_name_lists)
   end
 
-  def test_ls_no_options_one_contents
+  def test_format_one_contents
     content_name_lists = %w[1]
     expected = <<~TEXT.chomp
       1
@@ -17,7 +17,7 @@ class LsTest < Minitest::Test
     assert_equal expected, format(content_name_lists)
   end
 
-  def test_ls_no_options_two_contents
+  def test_format_two_contents
     content_name_lists = %w[1 2].shuffle
     expected = <<~TEXT.chomp
       1       2
@@ -25,7 +25,7 @@ class LsTest < Minitest::Test
     assert_equal expected, format(content_name_lists)
   end
 
-  def test_ls_no_options_three_contents
+  def test_format_three_contents
     content_name_lists = %w[1 2 3].shuffle
     expected = <<~TEXT.chomp
       1       2       3
@@ -33,7 +33,7 @@ class LsTest < Minitest::Test
     assert_equal expected, format(content_name_lists)
   end
 
-  def test_ls_no_options_four_contents
+  def test_format_four_contents
     content_name_lists = %w[1 2 3 4].shuffle
     expected = <<~TEXT.chomp
       1       3
@@ -42,7 +42,7 @@ class LsTest < Minitest::Test
     assert_equal expected, format(content_name_lists)
   end
 
-  def test_ls_no_options_five_contents
+  def test_format_five_contents
     content_name_lists = %w[1 2 3 4 5].shuffle
     expected = <<~TEXT.chomp
       1       3       5
