@@ -51,6 +51,15 @@ class LsTest < Minitest::Test
     assert_equal expected, format(content_name_lists)
   end
 
+  def test_format_five_contents_reverse
+    content_name_lists = %w[1 2 3 4 5].shuffle
+    expected = <<~TEXT.chomp
+      5       3       1
+      4       2
+    TEXT
+    assert_equal expected, format(content_name_lists, reverse: true)
+  end
+
   def test_ls_without_opton_a
     options = {}
     contents = list_directory_contents(options).split("\s")
@@ -62,5 +71,17 @@ class LsTest < Minitest::Test
     contents = list_directory_contents(options).split("\s")
     assert(contents.find { |content| content.start_with?('.') })
     assert(contents.find { |content| content.start_with?('..') })
+  end
+
+  def test_ls_without_opton_r
+    options = { a: true }
+    contents = list_directory_contents(options).split("\s")
+    assert(contents[0].start_with?('.'))
+  end
+
+  def test_ls_with_opton_r
+    options = { a: true, r: true }
+    contents = list_directory_contents(options).split("\s")
+    assert(contents[-1].start_with?('.'))
   end
 end

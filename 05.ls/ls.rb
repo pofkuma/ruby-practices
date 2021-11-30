@@ -14,12 +14,16 @@ def convert_layout(file_names, line_count, max_name_length)
   lines.map(&:rstrip).join("\n")
 end
 
-def format(contents)
+def format(contents, reverse: false)
   return if contents.size.zero?
 
   line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
   max_name_length = contents.map(&:length).max
-  convert_layout(contents.sort, line_count, max_name_length)
+  convert_layout(
+    reverse ? contents.sort.reverse : contents.sort,
+    line_count,
+    max_name_length
+  )
 end
 
 def list_directory_contents(options)
@@ -29,7 +33,7 @@ def list_directory_contents(options)
     else
       Dir.glob('*')
     end
-  format(entries)
+  format(entries, reverse: options[:r])
 end
 
 if $PROGRAM_NAME == __FILE__
@@ -38,6 +42,7 @@ if $PROGRAM_NAME == __FILE__
 
   options = {}
   opt.on('-a') { |boolean| options[:a] = boolean }
+  opt.on('-r') { |boolean| options[:r] = boolean }
 
   opt.parse!(ARGV)
   puts list_directory_contents(options)
