@@ -20,7 +20,7 @@ def format(contents, reverse: false)
   line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
   max_name_length = contents.map(&:length).max
   convert_layout(
-    reverse ? contents.sort.reverse : contents.sort,
+    contents.sort.then { reverse ? _1.reverse : _1 },
     line_count,
     max_name_length
   )
