@@ -17,13 +17,10 @@ end
 def format(contents, reverse: false)
   return if contents.size.zero?
 
+  sorted_contents = contents.sort.then { reverse ? _1.reverse : _1 }
   line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
   max_name_length = contents.map(&:length).max
-  convert_layout(
-    contents.sort.then { reverse ? _1.reverse : _1 },
-    line_count,
-    max_name_length
-  )
+  convert_layout(sorted_contents, line_count, max_name_length)
 end
 
 def list_directory_contents(options)
