@@ -18,6 +18,8 @@ def convert_layout(file_names, line_count, max_name_length)
 end
 
 def format_contents(contents)
+  return if contents.size.zero?
+
   line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
   max_name_length = contents.map(&:length).max
 
@@ -47,10 +49,12 @@ def permissions_string(number)
   format('%o', number).to_s.chars.map { |char| convert_permission_to_rwx(char) }.join
 end
 
-def query_file_statuses(file)
+def query_file_properties(file, totalize)
   filestatus = File.stat(file)
   filetype = filetype_char(File.ftype(file))
   permisions_number = permissions_string(filestatus.world_readable?)
+
+  totalize.call(filestatus.blocks)
 
   [[:filetype_and_permissions, "#{filetype}#{permisions_number} "],
    [:number_of_links,          filestatus.nlink],
@@ -76,9 +80,10 @@ def justify_contents_value(contents)
 end
 
 def format_contents_long(files, base_path)
-  pathnames = files.map { |file| "#{base_path}/#{file}" }
-  total_blocks = pathnames.map { File.stat(_1).blocks }.sum
-  contents = pathnames.map { query_file_statuses(_1) }
+  total_blocks = 0
+  contents = files.map do |file|
+    query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
+  end
 
   ["total #{total_blocks}"] + justify_contents_value(contents).map { _1.values.join("\s") }
 end
@@ -89,7 +94,6 @@ def list_directory_contents(path, all: false, reverse: false, long: false)
   flag = all ? File::FNM_DOTMATCH : nil
   entries = Dir.glob(*['*', flag].compact, base: path, sort: true)
                .then { reverse ? _1.reverse : _1 }
-  return if entries.size.zero?
 
   long ? format_contents_long(entries, path) : format_contents(entries)
 end
@@ -106,5 +110,7 @@ if $PROGRAM_NAME == __FILE__
   opt.parse!(ARGV)
 
   path = ARGV[0] || '.'
-  puts list_directory_contents(path, **options)
+  if (result = list_directory_contents(path, **options))
+    puts result
+  end
 end

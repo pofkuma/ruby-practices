@@ -102,6 +102,12 @@ class LsTest < Minitest::Test
     assert_equal expected_contents, contents
   end
 
+  def test_ls_with_opton_l_no_contents
+    options = { long: true }
+    contents = list_directory_contents(TEST_DIR, **options)
+    assert_equal ['total 0'], contents
+  end
+
   def test_filetype_char
     files =
       # Paths are on macOS
