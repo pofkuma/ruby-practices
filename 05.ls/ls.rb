@@ -55,21 +55,25 @@ def query_file_properties(file, totalize)
 
   totalize.call(filestatus.blocks)
 
-  [[:filetype_and_permissions, "#{filetype}#{permisions_number} "],
-   [:number_of_links,          filestatus.nlink],
-   [:owner_name,               "#{Etc.getpwuid(filestatus.uid).name} "],
-   [:group_name,               "#{Etc.getgrgid(filestatus.gid).name} "],
-   [:number_of_filesize,       filestatus.size],
-   [:last_modified_date,       File.ctime(file).strftime('%_2m %_2d %H:%M')],
-   [:file,                     File.basename(file)]].to_h
+  {
+    filetype_and_permissions: "#{filetype}#{permisions_number} ",
+    number_of_links:    filestatus.nlink,
+    owner_name:         "#{Etc.getpwuid(filestatus.uid).name} ",
+    group_name:         "#{Etc.getgrgid(filestatus.gid).name} ",
+    number_of_filesize: filestatus.size,
+    last_modified_date: File.ctime(file).strftime('%_2m %_2d %H:%M'),
+    file:               File.basename(file),
+  }
 end
 
 def justify_contents_value(contents)
   justfying_procs =
-    [[:number_of_links,    ->(value, width) { value.rjust(width) }],
-     [:owner_name,         ->(value, width) { value.ljust(width) }],
-     [:group_name,         ->(value, width) { value.ljust(width) }],
-     [:number_of_filesize, ->(value, width) { value.rjust(width) }]].to_h
+    {
+      number_of_links:    ->(value, width) { value.rjust(width) },
+      owner_name:         ->(value, width) { value.ljust(width) },
+      group_name:         ->(value, width) { value.ljust(width) },
+      number_of_filesize: ->(value, width) { value.rjust(width) },
+    }
 
   justfying_procs.each do |name, proc|
     max_length = contents.map { _1.fetch(name).to_s.length }.max
