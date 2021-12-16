@@ -75,8 +75,8 @@ def justify_contents_value(contents)
     group_name:         ->(value, width) { value.ljust(width) },
     number_of_filesize: ->(value, width) { value.rjust(width) }
   }.each do |name, proc|
-    max_length = contents.map { _1.fetch(name).to_s.length }.max
-    justified_contents.each { |content| content[name] = proc.call(content.fetch(name).to_s, max_length) }
+    max_length = contents.map { _1[name].to_s.length }.max
+    justified_contents.each { |content| content[name] = proc.call(content[name].to_s, max_length) }
   end
   justified_contents
 end
