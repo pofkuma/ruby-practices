@@ -94,8 +94,8 @@ end
 def list_directory_contents(path, all: false, reverse: false, long: false)
   return "ls: #{path}: No such file or directory" unless FileTest.exist?(path)
 
-  flag = all ? File::FNM_DOTMATCH : nil
-  entries = Dir.glob(*['*', flag].compact, base: path, sort: true)
+  flags = all ? File::FNM_DOTMATCH : 0
+  entries = Dir.glob('*', flags, base: path, sort: true)
                .then { reverse ? _1.reverse : _1 }
 
   long ? format_contents_long(entries, path) : format_contents(entries)
