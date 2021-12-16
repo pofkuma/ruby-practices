@@ -51,12 +51,12 @@ end
 def query_file_properties(file, totalize)
   filestat = File.stat(file)
   filetype = filetype_char(File.ftype(file))
-  permisions_number = permissions_string(filestat.world_readable?)
+  permisions = permissions_string(filestat.world_readable?)
 
   totalize.call(filestat.blocks)
 
   {
-    filetype_and_permissions: "#{filetype}#{permisions_number} ",
+    filetype_and_permissions: "#{filetype}#{permisions} ",
     number_of_links:    filestat.nlink,
     owner_name:         "#{Etc.getpwuid(filestat.uid).name} ",
     group_name:         "#{Etc.getgrgid(filestat.gid).name} ",
