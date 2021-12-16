@@ -27,16 +27,15 @@ def format_contents(contents)
 end
 
 def filetype_char(file_type)
-  case file_type
-  when 'file'             then :-
-  when 'directory'        then :d
-  when 'characterSpecial' then :c
-  when 'blockSpecial'     then :b
-  when 'fifo'             then :p
-  when 'link'             then :l
-  when 'socket'           then :s
-  else raise 'unkown file type'
-  end.to_s
+  {
+    file:             :-,
+    directory:        :d,
+    characterSpecial: :c,
+    blockSpecial:     :b,
+    fifo:             :p,
+    link:             :l,
+    socket:           :s,
+  }[file_type.to_sym]
 end
 
 def convert_permission_to_rwx(numbers)

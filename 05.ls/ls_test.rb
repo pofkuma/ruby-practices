@@ -121,12 +121,11 @@ class LsTest < Minitest::Test
 
     files.each do |char, file|
       filetype = File.ftype(file)
-      assert_equal char.to_s, filetype_char(filetype)
+      assert_equal char, filetype_char(filetype)
     end
   end
 
-  def test_filetype_char_error
-    error = assert_raises(RuntimeError) { filetype_char(nil) }
-    assert_equal 'unkown file type', error.message
+  def test_filetype_char_unknown
+    assert_nil filetype_char('')
   end
 end
