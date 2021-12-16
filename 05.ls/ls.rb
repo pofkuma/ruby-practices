@@ -38,8 +38,8 @@ def filetype_char(file_type)
   }[file_type.to_sym]
 end
 
-def convert_permission_to_rwx(numbers)
-  numbers.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
+def convert_permission_to_rwx(number)
+  number.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
     flag.to_i.zero? ? '-' : %i[r w x][index]
   end.join
 end
