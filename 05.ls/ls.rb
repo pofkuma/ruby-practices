@@ -49,18 +49,18 @@ def permissions_string(number)
 end
 
 def query_file_properties(file, totalize)
-  filestatus = File.stat(file)
+  filestat = File.stat(file)
   filetype = filetype_char(File.ftype(file))
-  permisions_number = permissions_string(filestatus.world_readable?)
+  permisions_number = permissions_string(filestat.world_readable?)
 
-  totalize.call(filestatus.blocks)
+  totalize.call(filestat.blocks)
 
   {
     filetype_and_permissions: "#{filetype}#{permisions_number} ",
-    number_of_links:    filestatus.nlink,
-    owner_name:         "#{Etc.getpwuid(filestatus.uid).name} ",
-    group_name:         "#{Etc.getgrgid(filestatus.gid).name} ",
-    number_of_filesize: filestatus.size,
+    number_of_links:    filestat.nlink,
+    owner_name:         "#{Etc.getpwuid(filestat.uid).name} ",
+    group_name:         "#{Etc.getgrgid(filestat.gid).name} ",
+    number_of_filesize: filestat.size,
     last_modified_date: File.ctime(file).strftime('%_2m %_2d %H:%M'),
     file:               File.basename(file),
   }
