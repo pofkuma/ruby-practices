@@ -67,19 +67,18 @@ def query_file_properties(file, totalize)
 end
 
 def justify_contents_value(contents)
-  justfying_procs =
-    {
-      number_of_links:    ->(value, width) { value.rjust(width) },
-      owner_name:         ->(value, width) { value.ljust(width) },
-      group_name:         ->(value, width) { value.ljust(width) },
-      number_of_filesize: ->(value, width) { value.rjust(width) },
-    }
+  justified_contents = contents.dup
 
-  justfying_procs.each do |name, proc|
+  {
+    number_of_links:    ->(value, width) { value.rjust(width) },
+    owner_name:         ->(value, width) { value.ljust(width) },
+    group_name:         ->(value, width) { value.ljust(width) },
+    number_of_filesize: ->(value, width) { value.rjust(width) },
+  }.each do |name, proc|
     max_length = contents.map { _1.fetch(name).to_s.length }.max
-    contents.map { |content| content[name] = proc.call(content.fetch(name).to_s, max_length) }
+    justified_contents.each { |content| content[name] = proc.call(content.fetch(name).to_s, max_length) }
   end
-  contents
+  justified_contents
 end
 
 def format_contents_long(files, base_path)
