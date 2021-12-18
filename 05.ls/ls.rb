@@ -66,8 +66,8 @@ def query_file_properties(file, totalize)
   }
 end
 
-def justify_contents_value(contents)
-  justified_contents = contents.dup
+def justify_properties_values(file_properties_lists)
+  justified_lists = file_properties_lists.dup
 
   {
     number_of_links: ->(value, width) { value.rjust(width) },
@@ -75,10 +75,10 @@ def justify_contents_value(contents)
     group_name: ->(value, width) { value.ljust(width) },
     number_of_filesize: ->(value, width) { value.rjust(width) }
   }.each do |name, proc|
-    max_length = contents.map { _1[name].to_s.length }.max
-    justified_contents.each { |content| content[name] = proc.call(content[name].to_s, max_length) }
+    max_length = file_properties_lists.map { _1[name].to_s.length }.max
+    justified_lists.each { |content| content[name] = proc.call(content[name].to_s, max_length) }
   end
-  justified_contents
+  justified_lists
 end
 
 def format_contents_long(files, base_path)
@@ -87,7 +87,7 @@ def format_contents_long(files, base_path)
     query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
   end
 
-  ["total #{total_blocks}"] + justify_contents_value(contents).map { _1.values.join("\s") }
+  ["total #{total_blocks}"] + justify_properties_values(contents).map { _1.values.join("\s") }
 end
 
 def list_directory_contents(path, all: false, reverse: false, long: false)
