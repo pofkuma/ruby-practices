@@ -5,6 +5,3 @@ inherit_gem:
 Metrics/ClassLength:
   Exclude:
     - '**/*_test.rb'
-
-Layout/HashAlignment:
-  EnforcedColonStyle: table

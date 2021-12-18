@@ -28,13 +28,13 @@ end
 
 def filetype_char(file_type)
   {
-    file:             :-,
-    directory:        :d,
+    file: :-,
+    directory: :d,
     characterSpecial: :c,
-    blockSpecial:     :b,
-    fifo:             :p,
-    link:             :l,
-    socket:           :s
+    blockSpecial: :b,
+    fifo: :p,
+    link: :l,
+    socket: :s
   }[file_type.to_sym]
 end
 
@@ -57,12 +57,12 @@ def query_file_properties(file, totalize)
 
   {
     filetype_and_permissions: "#{filetype}#{permisions} ",
-    number_of_links:          filestat.nlink,
-    owner_name:               "#{Etc.getpwuid(filestat.uid).name} ",
-    group_name:               "#{Etc.getgrgid(filestat.gid).name} ",
-    number_of_filesize:       filestat.size,
-    last_modified_date:       File.ctime(file).strftime('%_2m %_2d %H:%M'),
-    file:                     File.basename(file)
+    number_of_links: filestat.nlink,
+    owner_name: "#{Etc.getpwuid(filestat.uid).name} ",
+    group_name: "#{Etc.getgrgid(filestat.gid).name} ",
+    number_of_filesize: filestat.size,
+    last_modified_date: File.ctime(file).strftime('%_2m %_2d %H:%M'),
+    file: File.basename(file)
   }
 end
 
@@ -70,9 +70,9 @@ def justify_contents_value(contents)
   justified_contents = contents.dup
 
   {
-    number_of_links:    ->(value, width) { value.rjust(width) },
-    owner_name:         ->(value, width) { value.ljust(width) },
-    group_name:         ->(value, width) { value.ljust(width) },
+    number_of_links: ->(value, width) { value.rjust(width) },
+    owner_name: ->(value, width) { value.ljust(width) },
+    group_name: ->(value, width) { value.ljust(width) },
     number_of_filesize: ->(value, width) { value.rjust(width) }
   }.each do |name, proc|
     max_length = contents.map { _1[name].to_s.length }.max
