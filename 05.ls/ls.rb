@@ -69,12 +69,15 @@ end
 def justify_properties_values(file_properties_lists)
   justified_lists = file_properties_lists.dup
 
-  {
-    number_of_links: ->(value, width) { value.rjust(width) },
-    owner_name: ->(value, width) { value.ljust(width) },
-    group_name: ->(value, width) { value.ljust(width) },
-    number_of_filesize: ->(value, width) { value.rjust(width) }
-  }.each do |name, proc|
+  justifying_procs =
+    {
+      number_of_links: ->(value, width) { value.rjust(width) },
+      owner_name: ->(value, width) { value.ljust(width) },
+      group_name: ->(value, width) { value.ljust(width) },
+      number_of_filesize: ->(value, width) { value.rjust(width) }
+    }
+
+  justifying_procs.each do |name, proc|
     max_length = file_properties_lists.map { _1[name].to_s.length }.max
     justified_lists.each { |content| content[name] = proc.call(content[name].to_s, max_length) }
   end
