@@ -13,7 +13,7 @@ class WcTest < Minitest::Test
 
     expected = "       2       2       8\n"
 
-    assert_equal expected, wc_in_stdin(input_text)
+    assert_equal expected, count_text(input_text)
   end
 
   def test_wc_in_stdin_empty
@@ -22,7 +22,7 @@ class WcTest < Minitest::Test
 
     expected = "       0       0       0\n"
 
-    assert_equal expected, wc_in_stdin(input_text)
+    assert_equal expected, count_text(input_text)
   end
 
   def test_wc_in_stdin_many
@@ -43,6 +43,17 @@ class WcTest < Minitest::Test
     expected = `wc #{input_file1.path} #{input_file2.path}`
 
     assert_equal expected, wc_in_file(input_file1.path, input_file2.path)
+  end
+
+  def test_wc_in_stdin_with_option_l
+    input_text = <<~TEXT
+      foo
+      bar
+    TEXT
+
+    expected = "       2\n"
+
+    assert_equal expected, count_text(input_text)
   end
 
   def test_wc_in_file_single
@@ -75,7 +86,7 @@ class WcTest < Minitest::Test
     assert_equal expected, wc_in_file(input_file1.path, input_file2.path)
   end
 
-  def test_wc_with_option_l
+  def test_wc_in_file_multiple_with_option_l
     input_file1 = Tempfile.open do |file|
       file.puts('foo')
       file
