@@ -1,11 +1,16 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
-def wc
+
+DEFAULT_COUNT_PROC = proc { |counts, target| counts[target] = 0 }
+COLUMN_SIZE = 8
+FILE_NAME = '-'
+
+def main
   count_results = Hash.new { |hash, key| hash[key] = Hash.new(&DEFAULT_COUNT_PROC) }
 
   ARGF.each do |line|
     primary_keys = {
-      object_id: ARGF.file.object_id,
+      object_id: ARGF.file.object_id,  # different when filepath is same
       filename_or_total: ARGF.filename
     }
     count_results[primary_keys][:line_count] += 1
@@ -13,15 +18,12 @@ def wc
     count_results[primary_keys][:byte_count] += line.bytesize
   end
 
-  if count_results.size > 1
-    total_counts = Hash.new(&DEFAULT_COUNT_PROC)
-    count_results.each do |_id, counts|
-      counts.each { |key, value| total_counts[key] += value }
-    end
+  count_results[{ filename_or_total: 'total' }] = total_counts(count_results) if count_results.size > 1
 
-    count_results[{ filename_or_total: 'total' }] = total_counts
-  end
+  puts generate_display_lines(count_results)
+end
 
+def generate_display_lines(count_results)
   count_results.map do |key, counts|
     colmuns = counts.values.map { _1.to_s.rjust(COLUMN_SIZE) }.join
 
@@ -29,12 +31,12 @@ def wc
   end
 end
 
-
-DEFAULT_COUNT_PROC = proc { |counts, target| counts[target] = 0 }
-COLUMN_SIZE = 8
-FILE_NAME = '-'
-
-if $PROGRAM_NAME == __FILE__
-
-  puts wc
+def total_counts(each_counts)
+  total_counts = Hash.new(&DEFAULT_COUNT_PROC)
+  each_counts.each do |_id, counts|
+    counts.each { |key, value| total_counts[key] += value }
+  end
+  total_counts
 end
+
+main if $PROGRAM_NAME == __FILE__
