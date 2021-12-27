@@ -62,6 +62,24 @@ class LsTest < Minitest::Test
     assert_equal expected, list_directory_contents(TEST_DIR)
   end
 
+  def test_ls_file_length_less
+    %w[1234567 foo].each { FileUtils.touch("#{TEST_DIR}/#{_1}") }
+    expected = '1234567 foo'
+    assert_equal expected, list_directory_contents(TEST_DIR)
+  end
+
+  def test_ls_file_length_just
+    %w[12345678 foo].each { FileUtils.touch("#{TEST_DIR}/#{_1}") }
+    expected = '12345678        foo'
+    assert_equal expected, list_directory_contents(TEST_DIR)
+  end
+
+  def test_ls_file_length_more
+    %w[123456789 foo].each { FileUtils.touch("#{TEST_DIR}/#{_1}") }
+    expected = '123456789       foo'
+    assert_equal expected, list_directory_contents(TEST_DIR)
+  end
+
   def test_ls_without_opton_a
     options = {}
     assert_nil list_directory_contents(TEST_DIR, **options)

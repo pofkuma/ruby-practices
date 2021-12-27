@@ -4,14 +4,26 @@
 require 'etc'
 require 'fileutils'
 
-PADDING_SIZE = 7
+PADDING_SIZE = 8
 MAX_COLUMUNS = 3
 
+def calc_content_width(name_length)
+  if name_length > PADDING_SIZE
+    name_length + PADDING_SIZE - 1
+  elsif name_length == PADDING_SIZE
+    name_length + PADDING_SIZE
+  else
+    PADDING_SIZE
+  end
+end
+
 def convert_layout(file_names, line_count, max_name_length)
+  width = calc_content_width(max_name_length)
+
   lines = Array.new(line_count) { '' }
   file_names.each_slice(line_count) do |names|
     names.each_with_index do |name, index|
-      lines[index] += name.ljust(max_name_length + PADDING_SIZE)
+      lines[index] += name.ljust(width)
     end
   end
   lines.map(&:rstrip).join("\n")
