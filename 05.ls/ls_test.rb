@@ -126,7 +126,7 @@ class LsTest < Minitest::Test
     assert_equal ['total 0'], contents
   end
 
-  def test_ls_without_opton_a_and_r
+  def test_ls_with_opton_all_reverse
     %w[1 2 3].each { FileUtils.touch("#{TEST_DIR}/#{_1}") }
     expected = <<~TEXT.chomp
       3       1       .
@@ -135,6 +135,36 @@ class LsTest < Minitest::Test
 
     options = { all: true, reverse: true }
     assert_equal expected, list_directory_contents(TEST_DIR, **options)
+  end
+
+  def test_ls_with_opton_all_long
+    FileUtils.mkdir("#{TEST_DIR}/dummy_dir")
+    FileUtils.touch("#{TEST_DIR}/dummy_file")
+    expected_contents = `ls -al #{TEST_DIR}`.split("\n")
+
+    options = { all: true, long: true }
+    contents = list_directory_contents(TEST_DIR, **options)
+    assert_equal expected_contents, contents
+  end
+
+  def test_ls_with_opton_reverse_long
+    FileUtils.mkdir("#{TEST_DIR}/dummy_dir")
+    FileUtils.touch("#{TEST_DIR}/dummy_file")
+    expected_contents = `ls -rl #{TEST_DIR}`.split("\n")
+
+    options = { reverse: true, long: true }
+    contents = list_directory_contents(TEST_DIR, **options)
+    assert_equal expected_contents, contents
+  end
+
+  def test_ls_with_opton_all_reverse_long
+    FileUtils.mkdir("#{TEST_DIR}/dummy_dir")
+    FileUtils.touch("#{TEST_DIR}/dummy_file")
+    expected_contents = `ls -arl #{TEST_DIR}`.split("\n")
+
+    options = { all: true, reverse: true, long: true }
+    contents = list_directory_contents(TEST_DIR, **options)
+    assert_equal expected_contents, contents
   end
 
   def test_filetype_char
