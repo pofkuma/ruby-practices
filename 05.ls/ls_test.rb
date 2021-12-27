@@ -108,6 +108,17 @@ class LsTest < Minitest::Test
     assert_equal ['total 0'], contents
   end
 
+  def test_ls_without_opton_a_and_r
+    %w[1 2 3].each { FileUtils.touch("#{TEST_DIR}/#{_1}") }
+    expected = <<~TEXT.chomp
+      3       1       .
+      2       ..
+    TEXT
+
+    options = { all: true, reverse: true }
+    assert_equal expected, list_directory_contents(TEST_DIR, **options)
+  end
+
   def test_filetype_char
     files =
       # Paths are on macOS
