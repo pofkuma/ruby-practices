@@ -4,17 +4,12 @@
 require 'etc'
 require 'fileutils'
 
-PADDING_SIZE = 8
+COLUMUN_SIZE = 8
 MAX_COLUMUNS = 3
 
 def calc_content_width(name_length)
-  if name_length > PADDING_SIZE
-    name_length + PADDING_SIZE - 1
-  elsif name_length == PADDING_SIZE
-    name_length + PADDING_SIZE
-  else
-    PADDING_SIZE
-  end
+  columun_count = (name_length / COLUMUN_SIZE) + 1
+  COLUMUN_SIZE * columun_count
 end
 
 def convert_layout(file_names, line_count, max_name_length)
