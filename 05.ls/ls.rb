@@ -4,12 +4,12 @@
 require 'etc'
 require 'fileutils'
 
-COLUMUN_SIZE = 8
-MAX_COLUMUNS = 3
+COLUMN_SIZE = 8
+MAX_COLUMNS = 3
 
 def calc_content_width(name_length)
-  columun_count = (name_length / COLUMUN_SIZE) + 1
-  COLUMUN_SIZE * columun_count
+  column_count = (name_length / COLUMN_SIZE) + 1
+  COLUMN_SIZE * column_count
 end
 
 def convert_layout(file_names, line_count, max_name_length)
@@ -27,7 +27,7 @@ end
 def format_contents(contents)
   return if contents.size.zero?
 
-  line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
+  line_count = (contents.size / MAX_COLUMNS.to_f).ceil
   max_name_length = contents.map(&:length).max
 
   convert_layout(contents, line_count, max_name_length)
