@@ -115,9 +115,9 @@ if $PROGRAM_NAME == __FILE__
   opt = OptionParser.new
 
   options = {}
-  opt.on('-a') { |boolean| options[:all] = boolean }
-  opt.on('-r') { |boolean| options[:reverse] = boolean }
-  opt.on('-l') { |boolean| options[:long] = boolean }
+  opt.on('-a') { |v| options[:all] = v }
+  opt.on('-r') { |v| options[:reverse] = v }
+  opt.on('-l') { |v| options[:long] = v }
 
   opt.parse!(ARGV)
 
