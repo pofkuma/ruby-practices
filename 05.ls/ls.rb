@@ -4,14 +4,21 @@
 require 'etc'
 require 'fileutils'
 
-PADDING_SIZE = 7
-MAX_COLUMUNS = 3
+COLUMN_SIZE = 8
+MAX_COLUMNS = 3
+
+def calc_content_width(name_length)
+  column_count = (name_length / COLUMN_SIZE) + 1
+  COLUMN_SIZE * column_count
+end
 
 def convert_layout(file_names, line_count, max_name_length)
+  width = calc_content_width(max_name_length)
+
   lines = Array.new(line_count) { '' }
   file_names.each_slice(line_count) do |names|
     names.each_with_index do |name, index|
-      lines[index] += name.ljust(max_name_length + PADDING_SIZE)
+      lines[index] += name.ljust(width)
     end
   end
   lines.map(&:rstrip).join("\n")
@@ -20,7 +27,7 @@ end
 def format_contents(contents)
   return if contents.size.zero?
 
-  line_count = (contents.size / MAX_COLUMUNS.to_f).ceil
+  line_count = (contents.size / MAX_COLUMNS.to_f).ceil
   max_name_length = contents.map(&:length).max
 
   convert_layout(contents, line_count, max_name_length)
@@ -108,9 +115,9 @@ if $PROGRAM_NAME == __FILE__
   opt = OptionParser.new
 
   options = {}
-  opt.on('-a') { |boolean| options[:all] = boolean }
-  opt.on('-r') { |boolean| options[:reverse] = boolean }
-  opt.on('-l') { |boolean| options[:long] = boolean }
+  opt.on('-a') { |v| options[:all] = v }
+  opt.on('-r') { |v| options[:reverse] = v }
+  opt.on('-l') { |v| options[:long] = v }
 
   opt.parse!(ARGV)
 
