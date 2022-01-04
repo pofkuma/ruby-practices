@@ -7,7 +7,7 @@ require 'fileutils'
 COLUMN_SIZE = 8
 MAX_COLUMNS = 3
 
-FILETYPE_CHAR =
+FILETYPE_CHARS =
   {
     file: :-,
     directory: :d,
@@ -41,7 +41,7 @@ def query_file_properties(file, totalize)
   filestat = File.stat(file)
   totalize.call(filestat.blocks)
   {
-    filetype: FILETYPE_CHAR[File.ftype(file).to_sym],
+    filetype: FILETYPE_CHARS[File.ftype(file).to_sym],
     permissions: permissions_string(filestat.world_readable?),
     number_of_links: filestat.nlink.to_s,
     owner_name: Etc.getpwuid(filestat.uid).name,

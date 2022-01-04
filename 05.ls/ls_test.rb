@@ -167,7 +167,7 @@ class LsTest < Minitest::Test
     assert_equal expected_contents, contents
   end
 
-  def test_filetype_char
+  def test_filetype_chars
     files =
       # Paths are on macOS
       { '-': '/var/log/system.log',                            # normal file
@@ -180,11 +180,11 @@ class LsTest < Minitest::Test
 
     files.each do |char, file|
       filetype = File.ftype(file).to_sym
-      assert_equal char, FILETYPE_CHAR[filetype]
+      assert_equal char, FILETYPE_CHARS[filetype]
     end
   end
 
   def test_filetype_char_unknown
-    assert_nil FILETYPE_CHAR['']
+    assert_nil FILETYPE_CHARS['']
   end
 end
