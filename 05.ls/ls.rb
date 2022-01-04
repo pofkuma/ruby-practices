@@ -14,13 +14,9 @@ end
 
 def convert_layout(file_names, line_count, max_name_length)
   width = calc_content_width(max_name_length)
-
-  lines = Array.new(line_count) { [] }
-  file_names.each_with_index do |name, index|
-    line_number = index % line_count
-    lines[line_number].push name.ljust(width)
-  end
-  lines.map { _1.join.rstrip }.join("\n")
+  columns = file_names.map { _1.ljust(width) }.each_slice(line_count).to_a
+  rows = columns[0].zip(*columns[1..])
+  rows.map { _1.join.rstrip }.join("\n")
 end
 
 def format_contents(contents)
