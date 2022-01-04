@@ -57,38 +57,33 @@ end
 
 def query_file_properties(file, totalize)
   filestat = File.stat(file)
-  filetype = filetype_char(File.ftype(file))
-  permisions = permissions_string(filestat.world_readable?)
-
   totalize.call(filestat.blocks)
-
   {
-    filetype_and_permissions: "#{filetype}#{permisions} ",
-    number_of_links: filestat.nlink,
-    owner_name: "#{Etc.getpwuid(filestat.uid).name} ",
-    group_name: "#{Etc.getgrgid(filestat.gid).name} ",
-    number_of_filesize: filestat.size,
-    last_modified_date: File.ctime(file).strftime('%_2m %_2d %H:%M'),
+    filetype: filetype_char(File.ftype(file)),
+    permissions: permissions_string(filestat.world_readable?),
+    number_of_links: filestat.nlink.to_s,
+    owner_name: Etc.getpwuid(filestat.uid).name,
+    group_name: Etc.getgrgid(filestat.gid).name,
+    number_of_filesize: filestat.size.to_s,
+    last_modified_date: File.ctime(file),
     file: File.basename(file)
   }
 end
 
 def justify_properties_values(file_properties_lists)
-  justified_lists = file_properties_lists.dup
-
-  justifying_procs =
-    {
-      number_of_links: ->(value, width) { value.rjust(width) },
-      owner_name: ->(value, width) { value.ljust(width) },
-      group_name: ->(value, width) { value.ljust(width) },
-      number_of_filesize: ->(value, width) { value.rjust(width) }
-    }
-
-  justifying_procs.each do |name, proc|
-    max_length = file_properties_lists.map { _1[name].to_s.length }.max
-    justified_lists.each { |content| content[name] = proc.call(content[name].to_s, max_length) }
+  keys = %i[number_of_links owner_name group_name number_of_filesize]
+  max_lengths = keys.map { |key| [key, file_properties_lists.map { _1[key].to_s.length }.max] }.to_h
+  file_properties_lists.map do |file_properties|
+    [
+      "#{file_properties[:filetype]}#{file_properties[:permissions]}\s",
+      file_properties[:number_of_links].rjust(max_lengths[:number_of_links]),
+      file_properties[:owner_name].ljust(max_lengths[:owner_name] + 1),
+      file_properties[:group_name].ljust(max_lengths[:group_name] + 1),
+      file_properties[:number_of_filesize].rjust(max_lengths[:number_of_filesize]),
+      file_properties[:last_modified_date].strftime('%_2m %_2d %H:%M'),
+      file_properties[:file]
+    ].join("\s")
   end
-  justified_lists
 end
 
 def format_contents_long(files, base_path)
@@ -97,7 +92,7 @@ def format_contents_long(files, base_path)
     query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
   end
 
-  ["total #{total_blocks}"] + justify_properties_values(contents).map { _1.values.join("\s") }
+  ["total #{total_blocks}"] + justify_properties_values(contents)
 end
 
 def list_directory_contents(path, all: false, reverse: false, long: false)
