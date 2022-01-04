@@ -62,18 +62,21 @@ def convert_permission_to_rwx(number)
   end.join
 end
 
-def justify_properties_values(file_properties_lists)
+def justify_properties_values(files_properties)
   keys = %i[number_of_links owner_name group_name number_of_filesize]
-  max_lengths = keys.map { |key| [key, file_properties_lists.map { _1[key].to_s.length }.max] }.to_h
-  file_properties_lists.map do |file_properties|
+  max_lengths = keys.map do |key|
+    max_length = files_properties.map { _1[key].to_s.length }.max
+    [key, max_length]
+  end.to_h
+  files_properties.map do |properties|
     [
-      "#{file_properties[:filetype]}#{file_properties[:permissions]}\s",
-      file_properties[:number_of_links].rjust(max_lengths[:number_of_links]),
-      file_properties[:owner_name].ljust(max_lengths[:owner_name] + 1),
-      file_properties[:group_name].ljust(max_lengths[:group_name] + 1),
-      file_properties[:number_of_filesize].rjust(max_lengths[:number_of_filesize]),
-      file_properties[:last_modified_date].strftime('%_2m %_2d %H:%M'),
-      file_properties[:file]
+      "#{properties[:filetype]}#{properties[:permissions]}\s",
+      properties[:number_of_links].rjust(max_lengths[:number_of_links]),
+      properties[:owner_name].ljust(max_lengths[:owner_name] + 1),
+      properties[:group_name].ljust(max_lengths[:group_name] + 1),
+      properties[:number_of_filesize].rjust(max_lengths[:number_of_filesize]),
+      properties[:last_modified_date].strftime('%_2m %_2d %H:%M'),
+      properties[:file]
     ].join("\s")
   end
 end
