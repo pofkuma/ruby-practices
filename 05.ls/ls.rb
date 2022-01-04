@@ -15,13 +15,12 @@ end
 def convert_layout(file_names, line_count, max_name_length)
   width = calc_content_width(max_name_length)
 
-  lines = Array.new(line_count) { '' }
-  file_names.each_slice(line_count) do |names|
-    names.each_with_index do |name, index|
-      lines[index] += name.ljust(width)
-    end
+  lines = Array.new(line_count) { [] }
+  file_names.each_with_index do |name, index|
+    line_number = index % line_count
+    lines[line_number].push name.ljust(width)
   end
-  lines.map(&:rstrip).join("\n")
+  lines.map { _1.join.rstrip }.join("\n")
 end
 
 def format_contents(contents)
