@@ -7,6 +7,17 @@ require 'fileutils'
 COLUMN_SIZE = 8
 MAX_COLUMNS = 3
 
+FILETYPE_CHAR =
+  {
+    file: :-,
+    directory: :d,
+    characterSpecial: :c,
+    blockSpecial: :b,
+    fifo: :p,
+    link: :l,
+    socket: :s
+  }.freeze
+
 def calc_content_width(name_length)
   column_count = (name_length / COLUMN_SIZE) + 1
   COLUMN_SIZE * column_count
@@ -28,18 +39,6 @@ def format_contents(contents)
   convert_layout(contents, line_count, max_name_length)
 end
 
-def filetype_char(file_type)
-  {
-    file: :-,
-    directory: :d,
-    characterSpecial: :c,
-    blockSpecial: :b,
-    fifo: :p,
-    link: :l,
-    socket: :s
-  }[file_type.to_sym]
-end
-
 def convert_permission_to_rwx(number)
   number.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
     flag.to_i.zero? ? '-' : %i[r w x][index]
@@ -54,7 +53,7 @@ def query_file_properties(file, totalize)
   filestat = File.stat(file)
   totalize.call(filestat.blocks)
   {
-    filetype: filetype_char(File.ftype(file)),
+    filetype: FILETYPE_CHAR[File.ftype(file).to_sym],
     permissions: permissions_string(filestat.world_readable?),
     number_of_links: filestat.nlink.to_s,
     owner_name: Etc.getpwuid(filestat.uid).name,
