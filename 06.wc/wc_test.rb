@@ -69,33 +69,37 @@ class WcTest < Minitest::Test
     assert_equal expected, main.join("\n")
   end
 
-  # def test_wc_in_stdin_with_option_l
-  #   input_text = <<~TEXT
-  #     foo
-  #     bar
-  #   TEXT
+  def test_wc_with_option_l
+    input_file = Tempfile.open do |file|
+      file.write(<<~TEXT)
+        foo
+        bar
+      TEXT
+      file
+    end
+    ARGV.replace %W[#{input_file.path}]
 
-  #   expected = "       2\n"
+    expected = "       2 #{input_file.path}"
 
-  #   assert_equal expected, count_text(input_text)
-  # end
+    assert_equal expected, main(line_only: true).join("\n")
+  end
 
-  # def test_wc_in_file_multiple_with_option_l
-  #   input_file1 = Tempfile.open do |file|
-  #     file.puts('foo')
-  #     file
-  #   end
-  #   input_file2 = Tempfile.open do |file|
-  #     file.puts('bar')
-  #     file
-  #   end
-  #   ARGV.replace %W[#{input_file1.path} #{input_file2.path}]
+  def test_wc_in_file_multiple_with_option_l
+    input_file1 = Tempfile.open do |file|
+      file.puts('foo')
+      file
+    end
+    input_file2 = Tempfile.open do |file|
+      file.puts('bar')
+      file
+    end
+    ARGV.replace %W[#{input_file1.path} #{input_file2.path}]
 
-  #   expected = <<-TEXT.chomp
-  #      1 #{input_file1.path}
-  #      1 #{input_file2.path}
-  #      2 total
-  #   TEXT
-  #   assert_equal expected, main.join("\n")
-  # end
+    expected = <<-TEXT.chomp
+       1 #{input_file1.path}
+       1 #{input_file2.path}
+       2 total
+    TEXT
+    assert_equal expected, main(line_only: true).join("\n")
+  end
 end
