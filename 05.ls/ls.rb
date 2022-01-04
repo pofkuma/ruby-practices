@@ -18,35 +18,23 @@ FILETYPE_CHAR =
     socket: :s
   }.freeze
 
-def calc_content_width(name_length)
-  column_count = (name_length / COLUMN_SIZE) + 1
-  COLUMN_SIZE * column_count
+def list_directory_contents(path, all: false, reverse: false, long: false)
+  return "ls: #{path}: No such file or directory" unless FileTest.exist?(path)
+
+  flags = all ? File::FNM_DOTMATCH : 0
+  entries = Dir.glob('*', flags, base: path, sort: true)
+               .then { reverse ? _1.reverse : _1 }
+
+  long ? format_contents_long(entries, path) : format_contents(entries)
 end
 
-def convert_layout(file_names, line_count, max_name_length)
-  width = calc_content_width(max_name_length)
-  columns = file_names.map { _1.ljust(width) }.each_slice(line_count).to_a
-  rows = columns[0].zip(*columns[1..])
-  rows.map { _1.join.rstrip }.join("\n")
-end
+def format_contents_long(files, base_path)
+  total_blocks = 0
+  contents = files.map do |file|
+    query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
+  end
 
-def format_contents(contents)
-  return if contents.size.zero?
-
-  line_count = (contents.size / MAX_COLUMNS.to_f).ceil
-  max_name_length = contents.map(&:length).max
-
-  convert_layout(contents, line_count, max_name_length)
-end
-
-def convert_permission_to_rwx(number)
-  number.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
-    flag.to_i.zero? ? '-' : %i[r w x][index]
-  end.join
-end
-
-def permissions_string(number)
-  format('%o', number).to_s.chars.map { |char| convert_permission_to_rwx(char) }.join
+  ["total #{total_blocks}"] + justify_properties_values(contents)
 end
 
 def query_file_properties(file, totalize)
@@ -62,6 +50,16 @@ def query_file_properties(file, totalize)
     last_modified_date: File.ctime(file),
     file: File.basename(file)
   }
+end
+
+def permissions_string(number)
+  format('%o', number).to_s.chars.map { |char| convert_permission_to_rwx(char) }.join
+end
+
+def convert_permission_to_rwx(number)
+  number.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
+    flag.to_i.zero? ? '-' : %i[r w x][index]
+  end.join
 end
 
 def justify_properties_values(file_properties_lists)
@@ -80,23 +78,25 @@ def justify_properties_values(file_properties_lists)
   end
 end
 
-def format_contents_long(files, base_path)
-  total_blocks = 0
-  contents = files.map do |file|
-    query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
-  end
+def format_contents(contents)
+  return if contents.size.zero?
 
-  ["total #{total_blocks}"] + justify_properties_values(contents)
+  line_count = (contents.size / MAX_COLUMNS.to_f).ceil
+  max_name_length = contents.map(&:length).max
+
+  convert_layout(contents, line_count, max_name_length)
 end
 
-def list_directory_contents(path, all: false, reverse: false, long: false)
-  return "ls: #{path}: No such file or directory" unless FileTest.exist?(path)
+def convert_layout(file_names, line_count, max_name_length)
+  width = calc_content_width(max_name_length)
+  columns = file_names.map { _1.ljust(width) }.each_slice(line_count).to_a
+  rows = columns[0].zip(*columns[1..])
+  rows.map { _1.join.rstrip }.join("\n")
+end
 
-  flags = all ? File::FNM_DOTMATCH : 0
-  entries = Dir.glob('*', flags, base: path, sort: true)
-               .then { reverse ? _1.reverse : _1 }
-
-  long ? format_contents_long(entries, path) : format_contents(entries)
+def calc_content_width(name_length)
+  column_count = (name_length / COLUMN_SIZE) + 1
+  COLUMN_SIZE * column_count
 end
 
 if $PROGRAM_NAME == __FILE__
