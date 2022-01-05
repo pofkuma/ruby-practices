@@ -3,7 +3,7 @@
 
 require 'optparse'
 
-DEFAULT_COUNT_PROC = proc { |counts, target| counts[target] = 0 }
+INITIAL_COUNT_PROC = proc { |counts, target| counts[target] = 0 }
 COLUMN_SIZE = 8
 FAKE_FILE_NAME = '-'
 
@@ -14,18 +14,16 @@ def main(line_only: false)
     filenames_counts =
       make_filenames_counts_include_emptyfile(filenames, filenames_counts, line_only)
   end
-
   filenames_counts.push(['total', total_counts(filenames_counts)]) if filenames_counts.size > 1
 
-  generate_display_lines(filenames_counts)
+  format_display_lines(filenames_counts)
 end
 
 def make_filenames_counts_using_argf(line_only)
-  files_counts = Hash.new { |hash, key| hash[key] = Hash.new(&DEFAULT_COUNT_PROC) }
+  files_counts = Hash.new { |hash, key| hash[key] = Hash.new(&INITIAL_COUNT_PROC) }
   ARGF.each do |line|
     unique_keys = { object_id: ARGF.file.object_id, # different when filenames are same
                     filename: ARGF.filename }
-
     files_counts[unique_keys][:line_count] += 1
     next if line_only
 
@@ -38,10 +36,10 @@ end
 def make_filenames_counts_include_emptyfile(filenames, filenames_counts, line_only)
   count_keys = make_count_keys(line_only)
   filenames.map do |filename|
-    counts = Hash.new(&DEFAULT_COUNT_PROC)
+    counts = Hash.new(&INITIAL_COUNT_PROC)
     count_keys.each { |key| counts[key] }
-    filenames_counts.map do |key_filename, value_counts|
-      counts = value_counts if key_filename == filename
+    filenames_counts.map do |to_filename, to_counts|
+      counts = to_counts if to_filename == filename
     end
     [filename, counts]
   end
@@ -54,17 +52,17 @@ def make_count_keys(line_only)
 end
 
 def total_counts(contents_with_counts)
-  total_counts = Hash.new(&DEFAULT_COUNT_PROC)
+  total_counts = Hash.new(&INITIAL_COUNT_PROC)
   contents_with_counts.each do |_id, counts|
     counts.each { |key, value| total_counts[key] += value }
   end
   total_counts
 end
 
-def generate_display_lines(filenames_counts)
+def format_display_lines(filenames_counts)
   filenames_counts.map do |filename, counts|
-    line = counts.values.map { _1.to_s.rjust(COLUMN_SIZE) }.join
-    filename == FAKE_FILE_NAME ? line : line + "\s#{filename}"
+    formatted_count = counts.values.map { _1.to_s.rjust(COLUMN_SIZE) }.join
+    filename == FAKE_FILE_NAME ? formatted_count : formatted_count + "\s#{filename}"
   end
 end
 
