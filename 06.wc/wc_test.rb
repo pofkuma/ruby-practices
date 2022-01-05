@@ -25,7 +25,7 @@ class WcTest < Minitest::Test
        5      50     505 #{input_file2.path}
       10     100    1010 total
     TEXT
-    assert_equal expected, main.join("\n")
+    assert_equal expected, main
   end
 
   def test_wc_in_file_single
@@ -39,7 +39,7 @@ class WcTest < Minitest::Test
     ARGV.replace %W[#{input_file.path}]
 
     expected = "       2       2       8 #{input_file.path}"
-    assert_equal expected, main.join("\n")
+    assert_equal expected, main
   end
 
   def test_wc_in_file_single_empty
@@ -47,7 +47,7 @@ class WcTest < Minitest::Test
     ARGV.replace %W[#{input_file.path}]
 
     expected = "       0       0       0 #{input_file.path}"
-    assert_equal expected, main.join("\n")
+    assert_equal expected, main
   end
 
   def test_wc_in_file_multiple
@@ -66,7 +66,7 @@ class WcTest < Minitest::Test
        1       1       4 #{input_file2.path}
        2       2       8 total
     TEXT
-    assert_equal expected, main.join("\n")
+    assert_equal expected, main
   end
 
   def test_wc_in_file_multiple_empty
@@ -79,7 +79,7 @@ class WcTest < Minitest::Test
        0       0       0 #{input_file2.path}
        0       0       0 total
     TEXT
-    assert_equal expected, main.join("\n")
+    assert_equal expected, main
   end
 
   def test_wc_in_file_multiple_same
@@ -94,7 +94,7 @@ class WcTest < Minitest::Test
        1       1       4 #{input_file.path}
        2       2       8 total
     TEXT
-    assert_equal expected, main.join("\n")
+    assert_equal expected, main
   end
 
   def test_wc_with_option_l_in_file_single
@@ -109,7 +109,7 @@ class WcTest < Minitest::Test
 
     expected = "       2 #{input_file.path}"
 
-    assert_equal expected, main(line_only: true).join("\n")
+    assert_equal expected, main(line_only: true)
   end
 
   def test_wc_with_option_l_in_file_multiple
@@ -128,6 +128,6 @@ class WcTest < Minitest::Test
        1 #{input_file2.path}
        2 total
     TEXT
-    assert_equal expected, main(line_only: true).join("\n")
+    assert_equal expected, main(line_only: true)
   end
 end

@@ -48,7 +48,7 @@ def format_display_lines(filenames_counts)
   filenames_counts.map do |filename, counts|
     formatted_count = counts.values.map { _1.to_s.rjust(COLUMN_SIZE) }.join
     filename == FAKE_FILE_NAME ? formatted_count : formatted_count + "\s#{filename}"
-  end
+  end.join("\n")
 end
 
 if $PROGRAM_NAME == __FILE__
