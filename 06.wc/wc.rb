@@ -4,25 +4,24 @@
 require 'optparse'
 
 COLUMN_SIZE = 8
-FAKE_FILE_NAME = '-'
+JUSTIFYING_COLUMN_PROC = ->(count) { count.to_s.rjust(COLUMN_SIZE) }
+TOTAL_CELL_TEXT = 'total'
 
 def main(line_only: false)
-  filenames_counts = make_filenames_counts(line_only)
-  filenames_counts.push(['total', total_counts(filenames_counts)]) if filenames_counts.size > 1
-  format_display_lines(filenames_counts)
-end
-
-def make_filenames_counts(line_only)
   if ARGV.empty?
     text = $stdin.gets(rs = nil)
-    [[FAKE_FILE_NAME, count_text(text, line_only)]]
+    counts = count_text(text, line_only)
+    counts.values.map(&JUSTIFYING_COLUMN_PROC).join
   else
-    ARGV.map do |pathname|
-      File.open(pathname) do |file|
-        text = file.gets(rs = nil)
-        [pathname, count_text(text, line_only)]
+    files_counts =
+      ARGV.map do |pathname|
+        File.open(pathname) do |file|
+          text = file.gets(rs = nil)
+          [pathname, count_text(text, line_only)]
+        end
       end
-    end
+    files_counts.push [TOTAL_CELL_TEXT, total_counts(files_counts)] if files_counts.size > 1
+    format_lines(files_counts)
   end
 end
 
@@ -36,18 +35,17 @@ def count_text(text, line_only)
   counts
 end
 
-def total_counts(filenames_counts)
+def total_counts(files_counts)
   total_counts = Hash.new { |counts, target| counts[target] = 0 }
-  filenames_counts.each do |_id, counts|
+  files_counts.each do |_filename, counts|
     counts.each { |key, value| total_counts[key] += value }
   end
   total_counts
 end
 
-def format_display_lines(filenames_counts)
-  filenames_counts.map do |filename, counts|
-    formatted_count = counts.values.map { _1.to_s.rjust(COLUMN_SIZE) }.join
-    filename == FAKE_FILE_NAME ? formatted_count : formatted_count + "\s#{filename}"
+def format_lines(files_counts)
+  files_counts.map do |filename, counts|
+    counts.values.map(&JUSTIFYING_COLUMN_PROC).join + "\s#{filename}"
   end.join("\n")
 end
 
