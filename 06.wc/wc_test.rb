@@ -51,19 +51,6 @@ class WcTest < Minitest::Test
   end
 
   def test_wc_in_file_multiple
-    input_file1 = Tempfile.new
-    input_file2 = Tempfile.new
-    ARGV.replace %W[#{input_file1.path} #{input_file2.path}]
-
-    expected = <<-TEXT.chomp
-       0       0       0 #{input_file1.path}
-       0       0       0 #{input_file2.path}
-       0       0       0 total
-    TEXT
-    assert_equal expected, main.join("\n")
-  end
-
-  def test_wc_in_file_multiple_empty
     input_file1 = Tempfile.open do |file|
       file.puts('foo')
       file
@@ -77,6 +64,34 @@ class WcTest < Minitest::Test
     expected = <<-TEXT.chomp
        1       1       4 #{input_file1.path}
        1       1       4 #{input_file2.path}
+       2       2       8 total
+    TEXT
+    assert_equal expected, main.join("\n")
+  end
+
+  def test_wc_in_file_multiple_empty
+    input_file1 = Tempfile.new
+    input_file2 = Tempfile.new
+    ARGV.replace %W[#{input_file1.path} #{input_file2.path}]
+
+    expected = <<-TEXT.chomp
+       0       0       0 #{input_file1.path}
+       0       0       0 #{input_file2.path}
+       0       0       0 total
+    TEXT
+    assert_equal expected, main.join("\n")
+  end
+
+  def test_wc_in_file_multiple_same
+    input_file = Tempfile.open do |file|
+      file.puts('foo')
+      file
+    end
+    ARGV.replace %W[#{input_file.path} #{input_file.path}]
+
+    expected = <<-TEXT.chomp
+       1       1       4 #{input_file.path}
+       1       1       4 #{input_file.path}
        2       2       8 total
     TEXT
     assert_equal expected, main.join("\n")
