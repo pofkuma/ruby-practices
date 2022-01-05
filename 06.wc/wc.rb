@@ -8,7 +8,19 @@ COLUMN_SIZE = 8
 FAKE_FILE_NAME = '-'
 
 def main(line_only: false)
-  filenames = ARGV.dup
+  filenames = ARGV.dup # ARGF shifts ARGV
+  filenames_counts = make_filenames_counts_using_argf(line_only)
+  unless filenames.empty?
+    filenames_counts =
+      make_filenames_counts_include_emptyfile(filenames, filenames_counts, line_only)
+  end
+
+  filenames_counts.push(['total', total_counts(filenames_counts)]) if filenames_counts.size > 1
+
+  generate_display_lines(filenames_counts)
+end
+
+def make_filenames_counts_using_argf(line_only)
   files_counts = Hash.new { |hash, key| hash[key] = Hash.new(&DEFAULT_COUNT_PROC) }
   ARGF.each do |line|
     unique_keys = { object_id: ARGF.file.object_id, # different when filenames are same
@@ -20,25 +32,25 @@ def main(line_only: false)
     files_counts[unique_keys][:word_count] += line.split("\s").size
     files_counts[unique_keys][:byte_count] += line.bytesize
   end
+  files_counts.map { |unique_keys, counts| [unique_keys[:filename], counts] }
+end
 
-  filenames_counts =
-    if filenames.empty?
-      files_counts.map { |unique_keys, counts| [unique_keys[:filename], counts] }
-    else
-      count_keys = [:line_count]
-      count_keys += [:word_count] + [:byte_count] unless line_only
-
-      filenames.map do |filename|
-        counts = Hash.new(&DEFAULT_COUNT_PROC)
-        count_keys.each { |key| counts[key] }
-        files_counts.map do |unique_keys, count_tables|
-          counts = count_tables if unique_keys[:filename] == filename
-        end
-        [filename, counts]
-      end
+def make_filenames_counts_include_emptyfile(filenames, filenames_counts, line_only)
+  count_keys = make_count_keys(line_only)
+  filenames.map do |filename|
+    counts = Hash.new(&DEFAULT_COUNT_PROC)
+    count_keys.each { |key| counts[key] }
+    filenames_counts.map do |key_filename, value_counts|
+      counts = value_counts if key_filename == filename
     end
-  filenames_counts.push(['total', total_counts(files_counts)]) if files_counts.size > 1
-  generate_display_lines(filenames_counts)
+    [filename, counts]
+  end
+end
+
+def make_count_keys(line_only)
+  return [:line_count] if line_only
+
+  %i[line_count word_count byte_count]
 end
 
 def total_counts(contents_with_counts)
