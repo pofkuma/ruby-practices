@@ -5,15 +5,7 @@ require 'tempfile'
 require_relative 'wc'
 
 class WcTest < Minitest::Test
-  def test_wc_in_empty_file
-    input_file = Tempfile.new
-    ARGV.replace %W[#{input_file.path}]
-
-    expected = "       0       0       0 #{input_file.path}"
-    assert_equal expected, main.join("\n")
-  end
-
-  def test_wc_in_many_counts
+  def test_wc_in_file_many_counts
     line_count = 10 / 2
     word_count = 10
     word_and_whitespace = '123456789 '
@@ -50,6 +42,14 @@ class WcTest < Minitest::Test
     assert_equal expected, main.join("\n")
   end
 
+  def test_wc_in_file_single_empty
+    input_file = Tempfile.new
+    ARGV.replace %W[#{input_file.path}]
+
+    expected = "       0       0       0 #{input_file.path}"
+    assert_equal expected, main.join("\n")
+  end
+
   def test_wc_in_file_multiple
     input_file1 = Tempfile.new
     input_file2 = Tempfile.new
@@ -82,7 +82,7 @@ class WcTest < Minitest::Test
     assert_equal expected, main.join("\n")
   end
 
-  def test_wc_with_option_l
+  def test_wc_with_option_l_in_file_single
     input_file = Tempfile.open do |file|
       file.write(<<~TEXT)
         foo
@@ -97,7 +97,7 @@ class WcTest < Minitest::Test
     assert_equal expected, main(line_only: true).join("\n")
   end
 
-  def test_wc_in_file_multiple_with_option_l
+  def test_wc_with_option_l_in_file_multiple
     input_file1 = Tempfile.open do |file|
       file.puts('foo')
       file
