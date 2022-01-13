@@ -7,21 +7,78 @@ require 'fileutils'
 COLUMN_SIZE = 8
 MAX_COLUMNS = 3
 
-def calc_content_width(name_length)
-  column_count = (name_length / COLUMN_SIZE) + 1
-  COLUMN_SIZE * column_count
+FILETYPE_CHARS =
+  {
+    file: :-,
+    directory: :d,
+    characterSpecial: :c,
+    blockSpecial: :b,
+    fifo: :p,
+    link: :l,
+    socket: :s
+  }.freeze
+
+def list_directory_contents(path, all: false, reverse: false, long: false)
+  return "ls: #{path}: No such file or directory" unless FileTest.exist?(path)
+
+  flags = all ? File::FNM_DOTMATCH : 0
+  entries = Dir.glob('*', flags, base: path, sort: true)
+               .then { reverse ? _1.reverse : _1 }
+
+  long ? format_contents_long(entries, path) : format_contents(entries)
 end
 
-def convert_layout(file_names, line_count, max_name_length)
-  width = calc_content_width(max_name_length)
-
-  lines = Array.new(line_count) { '' }
-  file_names.each_slice(line_count) do |names|
-    names.each_with_index do |name, index|
-      lines[index] += name.ljust(width)
-    end
+def format_contents_long(files, base_path)
+  total_blocks = 0
+  contents = files.map do |file|
+    query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
   end
-  lines.map(&:rstrip).join("\n")
+
+  ["total #{total_blocks}"] + justify_properties_values(contents)
+end
+
+def query_file_properties(file, totalize)
+  filestat = File.stat(file)
+  totalize.call(filestat.blocks)
+  {
+    filetype: FILETYPE_CHARS[File.ftype(file).to_sym],
+    permissions: permissions_string(filestat.world_readable?),
+    number_of_links: filestat.nlink.to_s,
+    owner_name: Etc.getpwuid(filestat.uid).name,
+    group_name: Etc.getgrgid(filestat.gid).name,
+    number_of_filesize: filestat.size.to_s,
+    last_modified_date: File.ctime(file),
+    file: File.basename(file)
+  }
+end
+
+def permissions_string(number)
+  format('%o', number).to_s.chars.map { |char| convert_permission_to_rwx(char) }.join
+end
+
+def convert_permission_to_rwx(number)
+  number.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
+    flag.to_i.zero? ? '-' : %i[r w x][index]
+  end.join
+end
+
+def justify_properties_values(files_properties)
+  keys = %i[number_of_links owner_name group_name number_of_filesize]
+  max_lengths = keys.map do |key|
+    max_length = files_properties.map { _1[key].to_s.length }.max
+    [key, max_length]
+  end.to_h
+  files_properties.map do |properties|
+    [
+      "#{properties[:filetype]}#{properties[:permissions]}\s",
+      properties[:number_of_links].rjust(max_lengths[:number_of_links]),
+      properties[:owner_name].ljust(max_lengths[:owner_name] + 1),
+      properties[:group_name].ljust(max_lengths[:group_name] + 1),
+      properties[:number_of_filesize].rjust(max_lengths[:number_of_filesize]),
+      properties[:last_modified_date].strftime('%_2m %_2d %H:%M'),
+      properties[:file]
+    ].join("\s")
+  end
 end
 
 def format_contents(contents)
@@ -33,81 +90,16 @@ def format_contents(contents)
   convert_layout(contents, line_count, max_name_length)
 end
 
-def filetype_char(file_type)
-  {
-    file: :-,
-    directory: :d,
-    characterSpecial: :c,
-    blockSpecial: :b,
-    fifo: :p,
-    link: :l,
-    socket: :s
-  }[file_type.to_sym]
+def convert_layout(file_names, line_count, max_name_length)
+  width = calc_content_width(max_name_length)
+  columns = file_names.map { _1.ljust(width) }.each_slice(line_count).to_a
+  rows = columns[0].zip(*columns[1..])
+  rows.map { _1.join.rstrip }.join("\n")
 end
 
-def convert_permission_to_rwx(number)
-  number.to_i.to_s(2).rjust(3, '0').chars.map.with_index do |flag, index|
-    flag.to_i.zero? ? '-' : %i[r w x][index]
-  end.join
-end
-
-def permissions_string(number)
-  format('%o', number).to_s.chars.map { |char| convert_permission_to_rwx(char) }.join
-end
-
-def query_file_properties(file, totalize)
-  filestat = File.stat(file)
-  filetype = filetype_char(File.ftype(file))
-  permisions = permissions_string(filestat.world_readable?)
-
-  totalize.call(filestat.blocks)
-
-  {
-    filetype_and_permissions: "#{filetype}#{permisions} ",
-    number_of_links: filestat.nlink,
-    owner_name: "#{Etc.getpwuid(filestat.uid).name} ",
-    group_name: "#{Etc.getgrgid(filestat.gid).name} ",
-    number_of_filesize: filestat.size,
-    last_modified_date: File.ctime(file).strftime('%_2m %_2d %H:%M'),
-    file: File.basename(file)
-  }
-end
-
-def justify_properties_values(file_properties_lists)
-  justified_lists = file_properties_lists.dup
-
-  justifying_procs =
-    {
-      number_of_links: ->(value, width) { value.rjust(width) },
-      owner_name: ->(value, width) { value.ljust(width) },
-      group_name: ->(value, width) { value.ljust(width) },
-      number_of_filesize: ->(value, width) { value.rjust(width) }
-    }
-
-  justifying_procs.each do |name, proc|
-    max_length = file_properties_lists.map { _1[name].to_s.length }.max
-    justified_lists.each { |content| content[name] = proc.call(content[name].to_s, max_length) }
-  end
-  justified_lists
-end
-
-def format_contents_long(files, base_path)
-  total_blocks = 0
-  contents = files.map do |file|
-    query_file_properties("#{base_path}/#{file}", ->(blocks) { total_blocks += blocks })
-  end
-
-  ["total #{total_blocks}"] + justify_properties_values(contents).map { _1.values.join("\s") }
-end
-
-def list_directory_contents(path, all: false, reverse: false, long: false)
-  return "ls: #{path}: No such file or directory" unless FileTest.exist?(path)
-
-  flags = all ? File::FNM_DOTMATCH : 0
-  entries = Dir.glob('*', flags, base: path, sort: true)
-               .then { reverse ? _1.reverse : _1 }
-
-  long ? format_contents_long(entries, path) : format_contents(entries)
+def calc_content_width(name_length)
+  column_count = (name_length / COLUMN_SIZE) + 1
+  COLUMN_SIZE * column_count
 end
 
 if $PROGRAM_NAME == __FILE__
