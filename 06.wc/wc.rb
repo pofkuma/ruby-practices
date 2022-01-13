@@ -12,10 +12,8 @@ def main(text: '', file_names: [], line_only: false)
       [['', count_text(text, line_only)]]
     else
       file_names.map do |pathname|
-        File.open(pathname) do |file|
-          text = file.read
-          [pathname, count_text(text, line_only)]
-        end
+        text = File.read(pathname)
+        [pathname, count_text(text, line_only)]
       end
     end
   files_counts.push [TOTAL_CELL_TEXT, total_counts(files_counts)] if files_counts.size > 1
@@ -24,10 +22,10 @@ end
 
 def count_text(text, line_only)
   counts = {}
-  counts[:line_count] = text.split("\n").size || 0
+  counts[:line_count] = text.lines.size
   unless line_only
-    counts[:word_count] = text.split("\s").size || 0
-    counts[:byte_count] = text.bytesize || 0
+    counts[:word_count] = text.split("\s").size
+    counts[:byte_count] = text.bytesize
   end
   counts
 end
