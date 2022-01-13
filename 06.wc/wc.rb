@@ -9,14 +9,14 @@ TOTAL_CELL_TEXT = 'total'
 
 def main(line_only: false)
   if ARGV.empty?
-    text = $stdin.gets(rs = nil)
+    text = $stdin.read
     counts = count_text(text, line_only)
     counts.values.map(&JUSTIFYING_COLUMN_PROC).join
   else
     files_counts =
       ARGV.map do |pathname|
         File.open(pathname) do |file|
-          text = file.gets(rs = nil)
+          text = file.read
           [pathname, count_text(text, line_only)]
         end
       end
@@ -27,10 +27,10 @@ end
 
 def count_text(text, line_only)
   counts = {}
-  counts[:line_count] = text&.split("\n")&.size || 0
+  counts[:line_count] = text.split("\n")&.size || 0
   unless line_only
-    counts[:word_count] = text&.split("\s")&.size || 0
-    counts[:byte_count] = text&.bytesize || 0
+    counts[:word_count] = text.split("\s")&.size || 0
+    counts[:byte_count] = text.bytesize || 0
   end
   counts
 end
