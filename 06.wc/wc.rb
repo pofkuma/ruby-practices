@@ -4,32 +4,29 @@
 require 'optparse'
 
 COLUMN_SIZE = 8
-JUSTIFYING_COLUMN_PROC = ->(count) { count.to_s.rjust(COLUMN_SIZE) }
 TOTAL_CELL_TEXT = 'total'
 
-def main(line_only: false)
-  if ARGV.empty?
-    text = $stdin.read
-    counts = count_text(text, line_only)
-    counts.values.map(&JUSTIFYING_COLUMN_PROC).join
-  else
-    files_counts =
-      ARGV.map do |pathname|
+def main(text: '', file_names: [], line_only: false)
+  files_counts =
+    if file_names.empty?
+      [['', count_text(text, line_only)]]
+    else
+      file_names.map do |pathname|
         File.open(pathname) do |file|
           text = file.read
           [pathname, count_text(text, line_only)]
         end
       end
-    files_counts.push [TOTAL_CELL_TEXT, total_counts(files_counts)] if files_counts.size > 1
-    format_lines(files_counts)
-  end
+    end
+  files_counts.push [TOTAL_CELL_TEXT, total_counts(files_counts)] if files_counts.size > 1
+  format_lines(files_counts)
 end
 
 def count_text(text, line_only)
   counts = {}
-  counts[:line_count] = text.split("\n")&.size || 0
+  counts[:line_count] = text.split("\n").size || 0
   unless line_only
-    counts[:word_count] = text.split("\s")&.size || 0
+    counts[:word_count] = text.split("\s").size || 0
     counts[:byte_count] = text.bytesize || 0
   end
   counts
@@ -45,11 +42,14 @@ end
 
 def format_lines(files_counts)
   files_counts.map do |filename, counts|
-    counts.values.map(&JUSTIFYING_COLUMN_PROC).join + "\s#{filename}"
+    justifying = ->(count) { count.to_s.rjust(COLUMN_SIZE) }
+    line = counts.values.map(&justifying).join + "\s#{filename}"
+    line.rstrip
   end.join("\n")
 end
 
 if $PROGRAM_NAME == __FILE__
   options = ARGV.getopts('l')
-  puts main(line_only: options['l'])
+  input = ARGV.empty? ? { text: $stdin.read } : { file_names: ARGV }
+  puts main(**input, line_only: options['l'])
 end
