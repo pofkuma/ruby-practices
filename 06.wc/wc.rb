@@ -31,11 +31,10 @@ def count_text(text, line_only)
 end
 
 def total_counts(files_counts)
-  total_counts = Hash.new { |counts, target| counts[target] = 0 }
-  files_counts.each do |_filename, counts|
-    counts.each { |key, value| total_counts[key] += value }
+  initial_counts = Hash.new { |counts, target| counts[target] = 0 }
+  files_counts.inject(initial_counts) do |total_counts, (_filename, counts)|
+    counts.map { |key, value| [key, total_counts[key] + value] }.to_h
   end
-  total_counts
 end
 
 def format_lines(files_counts)
